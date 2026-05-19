@@ -1,0 +1,38 @@
+# Node
+node_modules/
+dist/
+.next/
+.vite/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+postgres_data/
+redis_data/
+
+# Build
+coverage/
+.pytest_cache/
+
+# Misc
+*.sqlite3
