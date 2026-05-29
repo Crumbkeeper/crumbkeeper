@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRecipes } from "../hooks/useRecipes";
 
 export default function RecipesPage() {
-  const { recipes, createRecipe } = useRecipes();
+  const { recipes, createRecipe, updateRecipe, deleteRecipe } = useRecipes();
 
   const [targetYield, setTargetYield] = useState(1);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -15,11 +15,10 @@ export default function RecipesPage() {
     starter_grams: 0,
     salt_grams: 0,
     yield_count: 1,
+    notes: "",
   });
 
-  const handleCreate = async () => {
-    await createRecipe(form);
-
+  const resetForm = () => {
     setForm({
       name: "",
       category: "",
@@ -28,22 +27,35 @@ export default function RecipesPage() {
       starter_grams: 0,
       salt_grams: 0,
       yield_count: 1,
+      notes: "",
     });
 
     setEditingId(null);
+  };
+
+  const handleSave = async () => {
+    if (editingId) {
+      await updateRecipe(editingId, form);
+    } else {
+      await createRecipe(form);
+    }
+
+    resetForm();
+  };
+
+  const handleDelete = async () => {
+    if (editingId) {
+      await deleteRecipe(editingId);
+      resetForm();
+    }
   };
 
   const loadRecipe = (recipe: any) => {
     setEditingId(recipe.id);
 
     setForm({
-      name: recipe.name,
-      category: recipe.category,
-      flour_grams: recipe.flour_grams,
-      water_grams: recipe.water_grams,
-      starter_grams: recipe.starter_grams,
-      salt_grams: recipe.salt_grams,
-      yield_count: recipe.yield_count,
+      ...recipe,
+      notes: recipe.notes || "",
     });
   };
 
@@ -73,48 +85,38 @@ export default function RecipesPage() {
             {editingId ? "Edit Recipe" : "Create Recipe"}
           </h2>
 
-          <input className="w-full border rounded p-2"
-            placeholder="Recipe Name"
+          <input className="w-full border rounded p-2" placeholder="Recipe Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
 
-          <input className="w-full border rounded p-2"
-            placeholder="Category"
+          <input className="w-full border rounded p-2" placeholder="Category"
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
           />
 
-          <input className="w-full border rounded p-2"
-            placeholder="Flour"
-            type="number"
-            onChange={(e) => setForm({ ...form, flour_grams: Number(e.target.value) })}
-          />
-
-          <input className="w-full border rounded p-2"
-            placeholder="Water"
-            type="number"
-            onChange={(e) => setForm({ ...form, water_grams: Number(e.target.value) })}
-          />
-
-          <input className="w-full border rounded p-2"
-            placeholder="Starter"
-            type="number"
-            onChange={(e) => setForm({ ...form, starter_grams: Number(e.target.value) })}
-          />
-
-          <input className="w-full border rounded p-2"
-            placeholder="Salt"
-            type="number"
-            onChange={(e) => setForm({ ...form, salt_grams: Number(e.target.value) })}
+          <textarea
+            className="w-full border rounded p-2"
+            placeholder="Bake Notes"
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
           />
 
           <button
-            onClick={handleCreate}
+            onClick={handleSave}
             className="w-full rounded bg-amber-700 text-white p-2"
           >
             {editingId ? "Save Revision" : "Save Recipe"}
           </button>
+
+          {editingId && (
+            <button
+              onClick={handleDelete}
+              className="w-full rounded bg-red-700 text-white p-2"
+            >
+              Delete Recipe
+            </button>
+          )}
         </div>
 
         <div className="rounded-xl border p-6 space-y-4">
@@ -135,19 +137,13 @@ export default function RecipesPage() {
                 onClick={() => loadRecipe(recipe)}
               >
                 <h3 className="font-semibold">
-                  {recipe.name} — v{recipe.version}
+                  {recipe.name} - v{recipe.version}
                 </h3>
 
-                <p className="text-sm text-gray-600">
-                  {recipe.category}
-                </p>
-
-                <div className="mt-3 text-sm space-y-1">
-                  <div>Hydration: {calculateHydration(recipe)}%</div>
-                  <div>Starter: {calculateStarter(recipe)}%</div>
-                  <div>Salt: {calculateSalt(recipe)}%</div>
-                  <div>Total Dough: {totalDough(recipe) * targetYield}g</div>
-                </div>
+                <div>Hydration: {calculateHydration(recipe)}%</div>
+                <div>Starter: {calculateStarter(recipe)}%</div>
+                <div>Salt: {calculateSalt(recipe)}%</div>
+                <div>Total Dough: {totalDough(recipe) * targetYield}g</div>
               </div>
             ))}
           </div>

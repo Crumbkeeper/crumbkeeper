@@ -30,10 +30,32 @@ export function useRecipes() {
     await fetchRecipes();
   };
 
+  const updateRecipe = async (id: number, recipe: unknown) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(recipe),
+    });
+
+    await fetchRecipes();
+  };
+
+  const deleteRecipe = async (id: number) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
+
+    await fetchRecipes();
+  };
+
   return {
     recipes,
     loading,
     createRecipe,
+    updateRecipe,
+    deleteRecipe,
     refresh: fetchRecipes,
   };
 }
