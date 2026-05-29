@@ -30,6 +30,21 @@ export default function RecipesPage() {
     });
   };
 
+  const calculateHydration = (recipe: any) =>
+    ((recipe.water_grams / recipe.flour_grams) * 100).toFixed(1);
+
+  const calculateStarter = (recipe: any) =>
+    ((recipe.starter_grams / recipe.flour_grams) * 100).toFixed(1);
+
+  const calculateSalt = (recipe: any) =>
+    ((recipe.salt_grams / recipe.flour_grams) * 100).toFixed(1);
+
+  const totalDough = (recipe: any) =>
+    recipe.flour_grams +
+    recipe.water_grams +
+    recipe.starter_grams +
+    recipe.salt_grams;
+
   return (
     <div className="p-6 space-y-8">
       <h1 className="text-3xl font-bold">Recipes</h1>
@@ -41,58 +56,30 @@ export default function RecipesPage() {
             Create Recipe
           </h2>
 
-          <input
-            className="w-full border rounded p-2"
-            placeholder="Recipe Name"
+          <input className="w-full border rounded p-2" placeholder="Recipe Name"
             value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
 
-          <input
-            className="w-full border rounded p-2"
-            placeholder="Category"
+          <input className="w-full border rounded p-2" placeholder="Category"
             value={form.category}
-            onChange={(e) =>
-              setForm({ ...form, category: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
           />
 
-          <input
-            className="w-full border rounded p-2"
-            placeholder="Flour (g)"
-            type="number"
-            onChange={(e) =>
-              setForm({ ...form, flour_grams: Number(e.target.value) })
-            }
+          <input className="w-full border rounded p-2" placeholder="Flour (g)" type="number"
+            onChange={(e) => setForm({ ...form, flour_grams: Number(e.target.value) })}
           />
 
-          <input
-            className="w-full border rounded p-2"
-            placeholder="Water (g)"
-            type="number"
-            onChange={(e) =>
-              setForm({ ...form, water_grams: Number(e.target.value) })
-            }
+          <input className="w-full border rounded p-2" placeholder="Water (g)" type="number"
+            onChange={(e) => setForm({ ...form, water_grams: Number(e.target.value) })}
           />
 
-          <input
-            className="w-full border rounded p-2"
-            placeholder="Starter (g)"
-            type="number"
-            onChange={(e) =>
-              setForm({ ...form, starter_grams: Number(e.target.value) })
-            }
+          <input className="w-full border rounded p-2" placeholder="Starter (g)" type="number"
+            onChange={(e) => setForm({ ...form, starter_grams: Number(e.target.value) })}
           />
 
-          <input
-            className="w-full border rounded p-2"
-            placeholder="Salt (g)"
-            type="number"
-            onChange={(e) =>
-              setForm({ ...form, salt_grams: Number(e.target.value) })
-            }
+          <input className="w-full border rounded p-2" placeholder="Salt (g)" type="number"
+            onChange={(e) => setForm({ ...form, salt_grams: Number(e.target.value) })}
           />
 
           <button
@@ -105,7 +92,7 @@ export default function RecipesPage() {
 
         <div className="rounded-xl border p-6 space-y-4">
           <h2 className="text-xl font-semibold">
-            Saved Recipes
+            Recipe Intelligence
           </h2>
 
           <input
@@ -117,25 +104,22 @@ export default function RecipesPage() {
 
           <div className="space-y-4">
             {recipes.map((recipe: any) => (
-              <div
-                key={recipe.id}
-                className="rounded-lg border p-4"
-              >
-                <h3 className="font-semibold">
-                  {recipe.name}
-                </h3>
+              <div key={recipe.id} className="rounded-lg border p-4">
+                <h3 className="font-semibold">{recipe.name}</h3>
 
-                <p className="text-sm text-gray-600">
-                  {recipe.category}
-                </p>
+                <p className="text-sm text-gray-600">{recipe.category}</p>
 
-                <div className="mt-2 text-sm">
-                  Flour: {recipe.flour_grams * targetYield}g
-                  <br />
-                  Water: {recipe.water_grams * targetYield}g
-                  <br />
-                  Starter: {recipe.starter_grams * targetYield}g
-                  <br />
+                <div className="mt-3 text-sm space-y-1">
+                  <div>Hydration: {calculateHydration(recipe)}%</div>
+                  <div>Starter: {calculateStarter(recipe)}%</div>
+                  <div>Salt: {calculateSalt(recipe)}%</div>
+                  <div>Total Dough: {totalDough(recipe) * targetYield}g</div>
+                </div>
+
+                <div className="mt-3 text-sm">
+                  Flour: {recipe.flour_grams * targetYield}g<br />
+                  Water: {recipe.water_grams * targetYield}g<br />
+                  Starter: {recipe.starter_grams * targetYield}g<br />
                   Salt: {recipe.salt_grams * targetYield}g
                 </div>
               </div>
