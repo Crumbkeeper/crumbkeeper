@@ -1,14 +1,39 @@
-﻿import { useEffect, useState } from "react";
-import { apiFetch } from "../services/api";
+import { useEffect, useState } from "react";
+
+const API_URL = "http://127.0.0.1:8000/api/v1/orders";
 
 export function useOrders() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrders = async () => {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+
+    setOrders(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    apiFetch<any[]>("/orders")
-      .then(setOrders)
-      .catch(() => setOrders([]));
+    fetchOrders();
   }, []);
 
-  return orders;
+  const createOrder = async (order: unknown) => {
+    await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    });
+
+    await fetchOrders();
+  };
+
+  return {
+    orders,
+    loading,
+    createOrder,
+    refresh: fetchOrders,
+  };
 }

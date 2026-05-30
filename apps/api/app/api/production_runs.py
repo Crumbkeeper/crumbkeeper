@@ -20,10 +20,7 @@ def create_production_run(
     payload: ProductionRunCreate,
     db: Session = Depends(get_db),
 ):
-    run = ProductionRun(
-        name=payload.name,
-        status=payload.status,
-    )
+    run = ProductionRun(**payload.model_dump())
 
     db.add(run)
     db.commit()
@@ -39,6 +36,4 @@ def create_production_run(
 def list_production_runs(
     db: Session = Depends(get_db),
 ):
-    return db.query(
-        ProductionRun
-    ).all()
+    return db.query(ProductionRun).all()

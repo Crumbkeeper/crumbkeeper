@@ -1,15 +1,23 @@
 from pydantic import BaseModel
 
 
-class ProductionRunCreate(BaseModel):
-    name: str
-    status: str = "planned"
+class ProductionRunBase(BaseModel):
+    task_name: str
+    scheduled_time: str
+    linked_order_id: int | None = None
+    status: str = "scheduled"
 
 
-class ProductionRunResponse(BaseModel):
+class ProductionRunCreate(ProductionRunBase):
+    pass
+
+
+class ProductionRunUpdate(ProductionRunBase):
+    pass
+
+
+class ProductionRunResponse(ProductionRunBase):
     id: int
-    name: str
-    status: str
 
     class Config:
         from_attributes = True

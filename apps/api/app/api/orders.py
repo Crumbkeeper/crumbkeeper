@@ -20,9 +20,7 @@ def create_order(
     payload: OrderCreate,
     db: Session = Depends(get_db),
 ):
-    order = Order(
-        status=payload.status,
-    )
+    order = Order(**payload.model_dump())
 
     db.add(order)
     db.commit()

@@ -1,3 +1,4 @@
+from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -13,7 +14,24 @@ class Order(Base):
         index=True,
     )
 
+    customer_name: Mapped[str] = mapped_column(
+        String,
+    )
+
+    product_name: Mapped[str] = mapped_column(
+        String,
+    )
+
+    quantity: Mapped[int] = mapped_column(
+        Integer,
+        default=1,
+    )
+
+    pickup_date: Mapped[str] = mapped_column(
+        String,
+    )
+
     status: Mapped[str] = mapped_column(
         String,
-        default="pending",
+        default="new",
     )
