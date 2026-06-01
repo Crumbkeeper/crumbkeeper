@@ -10,3 +10,4 @@ from app.models.recipe import Recipe
 from app.models.recipe_ingredient import RecipeIngredient
 from app.models.user import User
 from app.models.capacity import BakeryCapacityProfile, CategoryCapacity, TimeBlockAvailability, EquipmentConstraint, CapacitySnapshot
+from app.models.forecast import DemandForecast, SalesTrendSnapshot, GrowthTarget, InventoryProjection, ForecastAlert
