@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.auth import router as auth_router
 from app.api.bakeries import router as bakeries_router
+from app.api.capacity import router as capacity_router
 from app.api.customers import router as customers_router
 from app.api.ember import router as ember_router
 from app.api.health import router as health_router
@@ -55,6 +56,7 @@ app.include_router(inventory_router, prefix=settings.API_V1_PREFIX)
 app.include_router(shopping_router, prefix=settings.API_V1_PREFIX)
 app.include_router(scheduling_router, prefix=settings.API_V1_PREFIX)
 app.include_router(ember_router, prefix=settings.API_V1_PREFIX)
+app.include_router(capacity_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
