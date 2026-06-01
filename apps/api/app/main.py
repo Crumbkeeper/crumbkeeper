@@ -16,6 +16,7 @@ from app.api.production_runs import router as production_runs_router
 from app.api.recipes import router as recipes_router
 from app.api.scheduling import router as scheduling_router
 from app.api.shopping import router as shopping_router
+from app.api.today import router as today_router
 from app.api.users import router as users_router
 from app.api.websocket import router as websocket_router
 from app.core.config import settings
@@ -61,6 +62,7 @@ app.include_router(ember_router, prefix=settings.API_V1_PREFIX)
 app.include_router(capacity_router, prefix=settings.API_V1_PREFIX)
 app.include_router(forecast_router, prefix=settings.API_V1_PREFIX)
 app.include_router(planner_router, prefix=settings.API_V1_PREFIX)
+app.include_router(today_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
