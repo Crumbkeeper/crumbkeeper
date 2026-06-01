@@ -1,63 +1,64 @@
-import { useState } from "react";
+﻿import { useState } from "react";
+import { useOrders } from "../hooks/useOrders";
+
+const statusFlow = [
+  "new",
+  "confirmed",
+  "scheduled",
+  "in production",
+  "baked",
+  "ready",
+  "completed",
+];
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const { orders, createOrder, updateOrder } = useOrders();
 
   const [form, setForm] = useState({
-    customer: "",
-    product: "",
+    customer_name: "",
+    product_name: "",
     quantity: 1,
     pickup_date: "",
     status: "new",
+    fulfillment_type: "pickup",
+    payment_status: "pending",
+    total_price: 0,
+    notes: "",
   });
 
-  const createOrder = () => {
-    const order = {
-      id: Date.now(),
-      ...form,
-    };
-
-    setOrders([...orders, order]);
+  const handleCreate = async () => {
+    await createOrder(form);
 
     setForm({
-      customer: "",
-      product: "",
+      customer_name: "",
+      product_name: "",
       quantity: 1,
       pickup_date: "",
       status: "new",
+      fulfillment_type: "pickup",
+      payment_status: "pending",
+      total_price: 0,
+      notes: "",
     });
   };
 
-  const advanceStatus = (id: number) => {
-    const flow = [
-      "new",
-      "confirmed",
-      "scheduled",
-      "in production",
-      "baked",
-      "ready",
-      "completed",
-    ];
+  const advanceStatus = async (order: any) => {
+    const current = statusFlow.indexOf(order.status);
 
-    setOrders(
-      orders.map((order) => {
-        if (order.id !== id) return order;
+    const next =
+      statusFlow[
+        Math.min(current + 1, statusFlow.length - 1)
+      ];
 
-        const current = flow.indexOf(order.status);
-
-        return {
-          ...order,
-          status: flow[Math.min(current + 1, flow.length - 1)],
-        };
-      })
-    );
+    await updateOrder(order.id, {
+      ...order,
+      status: next,
+    });
   };
 
   return (
     <div className="p-6 space-y-8">
-      <h1 className="text-3xl font-bold">
-        Orders
-      </h1>
+      <h1 className="text-3xl font-bold">Orders</h1>
 
       <div className="grid md:grid-cols-2 gap-8">
 
@@ -69,30 +70,23 @@ export default function OrdersPage() {
           <input
             className="w-full border rounded p-2"
             placeholder="Customer"
-            value={form.customer}
+            value={form.customer_name}
             onChange={(e) =>
-              setForm({ ...form, customer: e.target.value })
+              setForm({
+                ...form,
+                customer_name: e.target.value,
+              })
             }
           />
 
           <input
             className="w-full border rounded p-2"
             placeholder="Product"
-            value={form.product}
-            onChange={(e) =>
-              setForm({ ...form, product: e.target.value })
-            }
-          />
-
-          <input
-            className="w-full border rounded p-2"
-            type="number"
-            placeholder="Quantity"
-            value={form.quantity}
+            value={form.product_name}
             onChange={(e) =>
               setForm({
                 ...form,
-                quantity: Number(e.target.value),
+                product_name: e.target.value,
               })
             }
           />
@@ -110,7 +104,7 @@ export default function OrdersPage() {
           />
 
           <button
-            onClick={createOrder}
+            onClick={handleCreate}
             className="w-full rounded bg-amber-700 text-white p-2"
           >
             Save Order
@@ -118,28 +112,23 @@ export default function OrdersPage() {
         </div>
 
         <div className="rounded-xl border p-6 space-y-4">
-          <h2 className="text-xl font-semibold">
-            Order Queue
-          </h2>
-
-          {orders.map((order) => (
+          {orders.map((order: any) => (
             <div
               key={order.id}
-              className="rounded-lg border p-4 space-y-2"
+              className="rounded-lg border p-4"
             >
               <h3 className="font-semibold">
-                {order.customer}
+                {order.customer_name}
               </h3>
 
-              <div>{order.product}</div>
-              <div>Qty: {order.quantity}</div>
+              <div>{order.product_name}</div>
               <div>Status: {order.status}</div>
 
               <button
-                onClick={() => advanceStatus(order.id)}
-                className="rounded bg-sage-700 text-white px-3 py-1"
+                onClick={() => advanceStatus(order)}
+                className="rounded bg-amber-700 text-white px-3 py-1 mt-2"
               >
-                Advance
+                Advance Status
               </button>
             </div>
           ))}

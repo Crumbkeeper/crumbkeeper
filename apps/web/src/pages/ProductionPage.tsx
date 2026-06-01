@@ -1,13 +1,30 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProductionRuns } from "../hooks/useProductionRuns";
 
+const stageFlow = [
+  "prep",
+  "mix",
+  "bulk ferment",
+  "shape",
+  "proof",
+  "bake",
+  "cooling",
+  "complete",
+];
+
 export default function ProductionPage() {
-  const { runs, createRun } = useProductionRuns();
+  const { runs, createRun, updateRun } =
+    useProductionRuns();
 
   const [form, setForm] = useState({
     task_name: "",
     scheduled_time: "",
     linked_order_id: null,
+    stage: "prep",
+    priority: "normal",
+    batch_size: 1,
+    dough_weight: 0,
+    notes: "",
     status: "scheduled",
   });
 
@@ -18,7 +35,27 @@ export default function ProductionPage() {
       task_name: "",
       scheduled_time: "",
       linked_order_id: null,
+      stage: "prep",
+      priority: "normal",
+      batch_size: 1,
+      dough_weight: 0,
+      notes: "",
       status: "scheduled",
+    });
+  };
+
+  const advanceStage = async (run: any) => {
+    const current =
+      stageFlow.indexOf(run.stage);
+
+    const next =
+      stageFlow[
+        Math.min(current + 1, stageFlow.length - 1)
+      ];
+
+    await updateRun(run.id, {
+      ...run,
+      stage: next,
     });
   };
 
@@ -40,7 +77,10 @@ export default function ProductionPage() {
             placeholder="Task"
             value={form.task_name}
             onChange={(e) =>
-              setForm({ ...form, task_name: e.target.value })
+              setForm({
+                ...form,
+                task_name: e.target.value,
+              })
             }
           />
 
@@ -52,6 +92,19 @@ export default function ProductionPage() {
               setForm({
                 ...form,
                 scheduled_time: e.target.value,
+              })
+            }
+          />
+
+          <input
+            className="w-full border rounded p-2"
+            type="number"
+            placeholder="Dough Weight"
+            value={form.dough_weight}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                dough_weight: Number(e.target.value),
               })
             }
           />
@@ -79,7 +132,15 @@ export default function ProductionPage() {
               </h3>
 
               <div>{run.scheduled_time}</div>
-              <div>Status: {run.status}</div>
+              <div>Stage: {run.stage}</div>
+              <div>{run.dough_weight}g</div>
+
+              <button
+                onClick={() => advanceStage(run)}
+                className="rounded bg-amber-700 text-white px-3 py-1 mt-2"
+              >
+                Advance Stage
+              </button>
             </div>
           ))}
         </div>

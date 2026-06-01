@@ -6,7 +6,13 @@ class OrderBase(BaseModel):
     product_name: str
     quantity: int = 1
     pickup_date: str
+
     status: str = "new"
+    fulfillment_type: str = "pickup"
+    payment_status: str = "pending"
+
+    total_price: float = 0.0
+    notes: str | None = None
 
 
 class OrderCreate(OrderBase):

@@ -1,13 +1,11 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useRealtime() {
-  const [connected, setConnected] =
-    useState(false);
+  const [connected, setConnected] = useState(false);
+  const [events, setEvents] = useState<any[]>([]);
 
   useEffect(() => {
-    const socket = new WebSocket(
-      "ws://127.0.0.1:8000/ws"
-    );
+    const socket = new WebSocket("ws://127.0.0.1:8000/ws");
 
     socket.onopen = () => {
       setConnected(true);
@@ -17,10 +15,19 @@ export function useRealtime() {
       setConnected(false);
     };
 
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      setEvents((prev) => [...prev, data]);
+    };
+
     return () => {
       socket.close();
     };
   }, []);
 
-  return connected;
+  return {
+    connected,
+    events,
+  };
 }

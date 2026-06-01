@@ -21,3 +21,10 @@ class TokenResponse(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
+    bakery_name: str | None = None
+    role: str
+    is_active: bool
+
+    model_config = {
+        "from_attributes": True
+    }

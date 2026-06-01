@@ -1,7 +1,7 @@
 from app.db.session import Base
 from app.db.session import engine
 
-from app.models.user import User
+import app.db.base
 
 
 def init_db():

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from fastapi import Depends
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -40,6 +41,27 @@ def list_customers(
     return db.query(Customer).all()
 
 
+@router.get(
+    "/customers/{customer_id}",
+    response_model=CustomerResponse,
+)
+def get_customer(
+    customer_id: int,
+    db: Session = Depends(get_db),
+):
+    customer = db.query(Customer).filter(
+        Customer.id == customer_id
+    ).first()
+
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail="Customer not found",
+        )
+
+    return customer
+
+
 @router.put(
     "/customers/{customer_id}",
     response_model=CustomerResponse,
@@ -52,6 +74,12 @@ def update_customer(
     customer = db.query(Customer).filter(
         Customer.id == customer_id
     ).first()
+
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail="Customer not found",
+        )
 
     for key, value in payload.model_dump().items():
         setattr(customer, key, value)

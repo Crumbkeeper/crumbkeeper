@@ -11,6 +11,8 @@ from app.api.orders import router as orders_router
 from app.api.products import router as products_router
 from app.api.production_runs import router as production_runs_router
 from app.api.recipes import router as recipes_router
+from app.api.scheduling import router as scheduling_router
+from app.api.shopping import router as shopping_router
 from app.api.users import router as users_router
 from app.api.websocket import router as websocket_router
 from app.core.config import settings
@@ -50,6 +52,8 @@ app.include_router(production_runs_router, prefix=settings.API_V1_PREFIX)
 app.include_router(orders_router, prefix=settings.API_V1_PREFIX)
 app.include_router(products_router, prefix=settings.API_V1_PREFIX)
 app.include_router(inventory_router, prefix=settings.API_V1_PREFIX)
+app.include_router(shopping_router, prefix=settings.API_V1_PREFIX)
+app.include_router(scheduling_router, prefix=settings.API_V1_PREFIX)
 app.include_router(ember_router, prefix=settings.API_V1_PREFIX)
 
 

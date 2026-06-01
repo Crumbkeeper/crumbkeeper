@@ -1,55 +1,55 @@
 ﻿import { useEffect, useState } from "react";
 
-const API_URL = "http://127.0.0.1:8000/api/v1/production-runs";
+const API_URL = "http://127.0.0.1:8000/api/v1/products";
 
-export function useProductionRuns() {
-  const [runs, setRuns] = useState<any[]>([]);
+export function useProducts() {
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchRuns = async () => {
+  const fetchProducts = async () => {
     const response = await fetch(API_URL);
     const data = await response.json();
 
-    setRuns(data);
+    setProducts(data);
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchRuns();
+    fetchProducts();
   }, []);
 
-  const createRun = async (run: unknown) => {
+  const createProduct = async (product: unknown) => {
     await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(run),
+      body: JSON.stringify(product),
     });
 
-    await fetchRuns();
+    await fetchProducts();
   };
 
-  const updateRun = async (
+  const updateProduct = async (
     id: number,
-    run: unknown
+    product: unknown
   ) => {
     await fetch(`${API_URL}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(run),
+      body: JSON.stringify(product),
     });
 
-    await fetchRuns();
+    await fetchProducts();
   };
 
   return {
-    runs,
+    products,
     loading,
-    createRun,
-    updateRun,
-    refresh: fetchRuns,
+    createProduct,
+    updateProduct,
+    refresh: fetchProducts,
   };
 }
