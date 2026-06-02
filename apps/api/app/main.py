@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import app.db.models
+
 from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.bakeries import router as bakeries_router
