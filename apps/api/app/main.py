@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import app.db.models
 
 from app.api.analytics import router as analytics_router
+from app.api.automation import router as automation_router
+from app.api.printing import router as printing_router
 from app.api.auth import router as auth_router
 from app.api.bakeries import router as bakeries_router
 from app.api.capacity import router as capacity_router
@@ -12,6 +14,8 @@ from app.api.ember import router as ember_router
 from app.api.forecast import router as forecast_router
 from app.api.health import router as health_router
 from app.api.inventory import router as inventory_router
+from app.api.inventory_projections import router as inventory_projections_router
+from app.api.recurring import router as recurring_router
 from app.api.market import router as market_router
 from app.api.orders import router as orders_router
 from app.api.planner import router as planner_router
@@ -60,6 +64,8 @@ app.include_router(production_runs_router, prefix=settings.API_V1_PREFIX)
 app.include_router(orders_router, prefix=settings.API_V1_PREFIX)
 app.include_router(products_router, prefix=settings.API_V1_PREFIX)
 app.include_router(inventory_router, prefix=settings.API_V1_PREFIX)
+app.include_router(inventory_projections_router, prefix=settings.API_V1_PREFIX)
+app.include_router(recurring_router, prefix=settings.API_V1_PREFIX)
 app.include_router(shopping_router, prefix=settings.API_V1_PREFIX)
 app.include_router(scheduling_router, prefix=settings.API_V1_PREFIX)
 app.include_router(ember_router, prefix=settings.API_V1_PREFIX)
@@ -70,6 +76,8 @@ app.include_router(planner_router, prefix=settings.API_V1_PREFIX)
 app.include_router(today_router, prefix=settings.API_V1_PREFIX)
 app.include_router(market_router, prefix=settings.API_V1_PREFIX)
 app.include_router(analytics_router, prefix=settings.API_V1_PREFIX)
+app.include_router(automation_router, prefix=settings.API_V1_PREFIX)
+app.include_router(printing_router, prefix=settings.API_V1_PREFIX)
 
 
 @app.get("/")
