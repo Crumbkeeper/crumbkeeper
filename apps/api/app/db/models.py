@@ -34,3 +34,5 @@ from app.models.recipe_ingredient import RecipeIngredient
 from app.models.today import TodayAlert
 from app.models.today import TodayTask
 from app.models.user import User
+
+from app.models.shopping import ShoppingItem

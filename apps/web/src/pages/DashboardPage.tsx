@@ -1,4 +1,4 @@
-﻿import { useMemo } from "react";
+import { useMemo } from "react";
 import { useOrders } from "../hooks/useOrders";
 import { useProductionRuns } from "../hooks/useProductionRuns";
 import { useInventory } from "../hooks/useInventory";
@@ -7,7 +7,7 @@ import { useRealtime } from "../hooks/useRealtime";
 export default function DashboardPage() {
   const { orders } = useOrders();
   const { runs } = useProductionRuns();
-  const inventory = useInventory();
+  const { inventory } = useInventory();
   const realtime = useRealtime();
 
   const tasks = useMemo(() => {

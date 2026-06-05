@@ -8,7 +8,6 @@ export default function MorePage() {
       </h1>
 
       <div className="grid gap-3">
-
         <Link to="/operations" className="rounded-xl border p-4">
           Operations Hub
         </Link>
@@ -29,8 +28,16 @@ export default function MorePage() {
           Products
         </Link>
 
+        <Link to="/ingredients" className="rounded-xl border p-4">
+          Ingredients
+        </Link>
+
         <Link to="/shopping" className="rounded-xl border p-4">
           Shopping
+        </Link>
+
+        <Link to="/inventory" className="rounded-xl border p-4">
+          Inventory
         </Link>
 
         <Link to="/storefront" className="rounded-xl border p-4">
@@ -48,7 +55,6 @@ export default function MorePage() {
         <Link to="/settings" className="rounded-xl border p-4">
           Settings
         </Link>
-
       </div>
     </div>
   )

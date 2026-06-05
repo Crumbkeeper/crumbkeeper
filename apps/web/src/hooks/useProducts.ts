@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const API_URL = "http://127.0.0.1:8000/api/v1/products";
 
@@ -44,12 +44,20 @@ export function useProducts() {
 
     await fetchProducts();
   };
+  const deleteProduct = async (id: number) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
+
+    await fetchProducts();
+  };
 
   return {
     products,
     loading,
     createProduct,
     updateProduct,
+    deleteProduct,
     refresh: fetchProducts,
-  };
-}
+  };}
+

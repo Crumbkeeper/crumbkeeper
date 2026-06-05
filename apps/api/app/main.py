@@ -14,6 +14,7 @@ from app.api.ember import router as ember_router
 from app.api.forecast import router as forecast_router
 from app.api.health import router as health_router
 from app.api.inventory import router as inventory_router
+from app.api.ingredients import router as ingredients_router
 from app.api.inventory_projections import router as inventory_projections_router
 from app.api.recurring import router as recurring_router
 from app.api.market import router as market_router
@@ -22,6 +23,7 @@ from app.api.planner import router as planner_router
 from app.api.products import router as products_router
 from app.api.production_runs import router as production_runs_router
 from app.api.recipes import router as recipes_router
+from app.api.recipe_ingredients import router as recipe_ingredients_router
 from app.api.scheduling import router as scheduling_router
 from app.api.shopping import router as shopping_router
 from app.api.today import router as today_router
@@ -60,10 +62,12 @@ app.include_router(users_router, prefix=settings.API_V1_PREFIX)
 app.include_router(bakeries_router, prefix=settings.API_V1_PREFIX)
 app.include_router(customers_router, prefix=settings.API_V1_PREFIX)
 app.include_router(recipes_router, prefix=settings.API_V1_PREFIX)
+app.include_router(recipe_ingredients_router, prefix=settings.API_V1_PREFIX)
 app.include_router(production_runs_router, prefix=settings.API_V1_PREFIX)
 app.include_router(orders_router, prefix=settings.API_V1_PREFIX)
 app.include_router(products_router, prefix=settings.API_V1_PREFIX)
 app.include_router(inventory_router, prefix=settings.API_V1_PREFIX)
+app.include_router(ingredients_router, prefix=settings.API_V1_PREFIX)
 app.include_router(inventory_projections_router, prefix=settings.API_V1_PREFIX)
 app.include_router(recurring_router, prefix=settings.API_V1_PREFIX)
 app.include_router(shopping_router, prefix=settings.API_V1_PREFIX)
@@ -85,3 +89,7 @@ async def root():
     return {
         "message": "Crumbkeeper API running"
     }
+
+
+
+

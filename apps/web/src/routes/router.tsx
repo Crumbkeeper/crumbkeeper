@@ -11,6 +11,7 @@ import CustomersPage from "../pages/CustomersPage"
 import DashboardPage from "../pages/DashboardPage"
 import ForecastPage from "../pages/ForecastPage"
 import InventoryPage from "../pages/InventoryPage"
+import IngredientsPage from "../pages/IngredientsPage"
 import LabelsPage from "../pages/LabelsPage"
 import MorePage from "../pages/MorePage"
 import EventsPage from "../pages/EventsPage"
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
       { path: "customers", element: <CustomersPage /> },
       { path: "products", element: <ProductsPage /> },
       { path: "inventory", element: <InventoryPage /> },
+      { path: "ingredients", element: <IngredientsPage /> },
       { path: "shopping", element: <ShoppingPage /> },
       { path: "storefront", element: <StorefrontPage /> },
       { path: "notifications", element: <NotificationsPage /> },
@@ -58,3 +60,5 @@ export const router = createBrowserRouter([
     ],
   },
 ])
+
+
