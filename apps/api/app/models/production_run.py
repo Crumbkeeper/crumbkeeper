@@ -89,6 +89,7 @@ class ProductionItem(Base):
     current_stage_index: Mapped[int] = mapped_column(Integer, default=0)
     stage_started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     suggested_stage_end: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     status: Mapped[str] = mapped_column(String, default="planned")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -109,3 +110,4 @@ class ProductionItemOrder(Base):
     production_item_id: Mapped[int] = mapped_column(ForeignKey("production_items.id"), nullable=False)
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
     quantity: Mapped[float] = mapped_column(Float, default=1.0)
+
