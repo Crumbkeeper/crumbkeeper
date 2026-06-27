@@ -22,6 +22,7 @@ class ProductionRunResponse(ProductionRunBase):
     class Config:
         from_attributes = True
 
+
 class ProductionItemBase(BaseModel):
     production_run_id: int
     recipe_id: int | None = None
@@ -59,3 +60,10 @@ class ProductionItemResponse(ProductionItemBase):
 
 class ProductionItemAdvanceStage(BaseModel):
     delay_minutes: int | None = None
+
+
+class ProductionItemComplete(BaseModel):
+    good_quantity: float
+    waste_quantity: float = 0.0
+    waste_reason: str | None = None
+    notes: str | None = None

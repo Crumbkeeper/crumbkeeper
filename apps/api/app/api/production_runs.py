@@ -350,3 +350,53 @@ def get_production_board(
         )
 
     return board
+
+from app.schemas.production_run import ProductionItemComplete
+
+
+@router.post(
+    "/production-items/{item_id}/complete",
+    response_model=ProductionItemResponse,
+)
+async def complete_production_item(
+    item_id: int,
+    payload: ProductionItemComplete,
+    db: Session = Depends(get_db),
+):
+    item = (
+        db.query(ProductionItem)
+        .filter(ProductionItem.id == item_id)
+        .first()
+    )
+
+    if not item:
+        raise HTTPException(
+            status_code=404,
+            detail="Production item not found",
+        )
+
+    item.good_quantity = payload.good_quantity
+    item.waste_quantity = payload.waste_quantity
+    item.waste_reason = payload.waste_reason
+    item.status = "completed"
+    item.completed_at = datetime.utcnow()
+    item.suggested_stage_end = None
+
+    if payload.notes is not None:
+        item.notes = payload.notes
+
+    db.commit()
+    db.refresh(item)
+
+    await manager.broadcast(
+        "production_item_completed",
+        {
+            "id": item.id,
+            "production_run_id": item.production_run_id,
+            "status": item.status,
+            "good_quantity": item.good_quantity,
+            "waste_quantity": item.waste_quantity,
+        },
+    )
+
+    return item
