@@ -22,6 +22,7 @@ from app.api.orders import router as orders_router
 from app.api.planner import router as planner_router
 from app.api.products import router as products_router
 from app.api.production_runs import router as production_runs_router
+from app.api.production_templates import router as production_templates_router
 from app.api.recipes import router as recipes_router
 from app.api.recipe_ingredients import router as recipe_ingredients_router
 from app.api.scheduling import router as scheduling_router
@@ -64,6 +65,7 @@ app.include_router(customers_router, prefix=settings.API_V1_PREFIX)
 app.include_router(recipes_router, prefix=settings.API_V1_PREFIX)
 app.include_router(recipe_ingredients_router, prefix=settings.API_V1_PREFIX)
 app.include_router(production_runs_router, prefix=settings.API_V1_PREFIX)
+app.include_router(production_templates_router, prefix=settings.API_V1_PREFIX)
 app.include_router(orders_router, prefix=settings.API_V1_PREFIX)
 app.include_router(products_router, prefix=settings.API_V1_PREFIX)
 app.include_router(inventory_router, prefix=settings.API_V1_PREFIX)
@@ -89,6 +91,7 @@ async def root():
     return {
         "message": "Crumbkeeper API running"
     }
+
 
 
 
