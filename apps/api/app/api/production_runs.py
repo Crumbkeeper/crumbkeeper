@@ -214,3 +214,139 @@ def delete_production_item(
     db.commit()
 
     return {"message": "Production item deleted"}
+
+from datetime import datetime
+from datetime import timedelta
+
+from app.models.production_run import ProductionTemplateStage
+from app.schemas.production_run import ProductionItemAdvanceStage
+
+
+@router.post(
+    "/production-items/{item_id}/advance",
+    response_model=ProductionItemResponse,
+)
+async def advance_production_item_stage(
+    item_id: int,
+    payload: ProductionItemAdvanceStage,
+    db: Session = Depends(get_db),
+):
+    item = (
+        db.query(ProductionItem)
+        .filter(ProductionItem.id == item_id)
+        .first()
+    )
+
+    if not item:
+        raise HTTPException(
+            status_code=404,
+            detail="Production item not found",
+        )
+
+    item.current_stage_index = item.current_stage_index + 1
+    item.stage_started_at = datetime.utcnow()
+
+    next_stage = None
+
+    if item.template_id is not None:
+        next_stage = (
+            db.query(ProductionTemplateStage)
+            .filter(
+                ProductionTemplateStage.template_id == item.template_id,
+                ProductionTemplateStage.stage_order == item.current_stage_index,
+            )
+            .first()
+        )
+
+    if next_stage and next_stage.alert_after_minutes is not None:
+        delay_minutes = payload.delay_minutes or next_stage.alert_after_minutes
+        item.suggested_stage_end = item.stage_started_at + timedelta(
+            minutes=delay_minutes,
+        )
+    elif payload.delay_minutes is not None:
+        item.suggested_stage_end = item.stage_started_at + timedelta(
+            minutes=payload.delay_minutes,
+        )
+    else:
+        item.suggested_stage_end = None
+
+    item.status = "active"
+
+    db.commit()
+    db.refresh(item)
+
+    await manager.broadcast(
+        "production_item_advanced",
+        {
+            "id": item.id,
+            "production_run_id": item.production_run_id,
+            "current_stage_index": item.current_stage_index,
+            "status": item.status,
+        },
+    )
+
+    return item
+
+
+@router.get("/production-board")
+def get_production_board(
+    db: Session = Depends(get_db),
+):
+    runs = db.query(ProductionRun).all()
+
+    board = []
+
+    for run in runs:
+        run_items = (
+            db.query(ProductionItem)
+            .filter(ProductionItem.production_run_id == run.id)
+            .all()
+        )
+
+        items = []
+
+        for item in run_items:
+            current_stage = None
+
+            if item.template_id is not None:
+                current_stage = (
+                    db.query(ProductionTemplateStage)
+                    .filter(
+                        ProductionTemplateStage.template_id == item.template_id,
+                        ProductionTemplateStage.stage_order == item.current_stage_index,
+                    )
+                    .first()
+                )
+
+            items.append(
+                {
+                    "id": item.id,
+                    "recipe_id": item.recipe_id,
+                    "product_id": item.product_id,
+                    "template_id": item.template_id,
+                    "planned_quantity": item.planned_quantity,
+                    "production_quantity": item.production_quantity,
+                    "good_quantity": item.good_quantity,
+                    "waste_quantity": item.waste_quantity,
+                    "waste_reason": item.waste_reason,
+                    "current_stage_index": item.current_stage_index,
+                    "current_stage_name": current_stage.stage_name if current_stage else None,
+                    "status": item.status,
+                    "notes": item.notes,
+                    "stage_started_at": item.stage_started_at,
+                    "suggested_stage_end": item.suggested_stage_end,
+                }
+            )
+
+        board.append(
+            {
+                "id": run.id,
+                "name": run.name,
+                "production_date": run.production_date,
+                "status": run.status,
+                "notes": run.notes,
+                "items": items,
+            }
+        )
+
+    return board

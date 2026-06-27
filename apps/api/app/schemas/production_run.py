@@ -55,3 +55,7 @@ class ProductionItemResponse(ProductionItemBase):
 
     class Config:
         from_attributes = True
+
+
+class ProductionItemAdvanceStage(BaseModel):
+    delay_minutes: int | None = None
