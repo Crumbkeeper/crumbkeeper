@@ -1,3 +1,6 @@
+﻿from datetime import datetime
+from datetime import timedelta
+
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
@@ -5,7 +8,15 @@ from sqlalchemy.orm import Session
 
 from app.core.websocket import manager
 from app.db.session import get_db
+from app.models.production_run import ProductionItem
 from app.models.production_run import ProductionRun
+from app.models.production_run import ProductionTemplateStage
+from app.schemas.production_run import ProductionItemAdvanceStage
+from app.schemas.production_run import ProductionItemComplete
+from app.schemas.production_run import ProductionItemCreate
+from app.schemas.production_run import ProductionItemResponse
+from app.schemas.production_run import ProductionItemUpdate
+from app.schemas.production_run import ProductionRunComplete
 from app.schemas.production_run import ProductionRunCreate
 from app.schemas.production_run import ProductionRunResponse
 from app.schemas.production_run import ProductionRunUpdate
@@ -48,17 +59,10 @@ def get_production_run(
     run_id: int,
     db: Session = Depends(get_db),
 ):
-    run = (
-        db.query(ProductionRun)
-        .filter(ProductionRun.id == run_id)
-        .first()
-    )
+    run = db.query(ProductionRun).filter(ProductionRun.id == run_id).first()
 
     if not run:
-        raise HTTPException(
-            status_code=404,
-            detail="Production run not found",
-        )
+        raise HTTPException(status_code=404, detail="Production run not found")
 
     return run
 
@@ -69,17 +73,10 @@ async def update_production_run(
     payload: ProductionRunUpdate,
     db: Session = Depends(get_db),
 ):
-    run = (
-        db.query(ProductionRun)
-        .filter(ProductionRun.id == run_id)
-        .first()
-    )
+    run = db.query(ProductionRun).filter(ProductionRun.id == run_id).first()
 
     if not run:
-        raise HTTPException(
-            status_code=404,
-            detail="Production run not found",
-        )
+        raise HTTPException(status_code=404, detail="Production run not found")
 
     for key, value in payload.model_dump().items():
         setattr(run, key, value)
@@ -97,10 +94,58 @@ async def update_production_run(
 
     return run
 
-from app.models.production_run import ProductionItem
-from app.schemas.production_run import ProductionItemCreate
-from app.schemas.production_run import ProductionItemResponse
-from app.schemas.production_run import ProductionItemUpdate
+
+@router.post("/production-runs/{run_id}/complete", response_model=ProductionRunResponse)
+async def complete_production_run(
+    run_id: int,
+    payload: ProductionRunComplete,
+    db: Session = Depends(get_db),
+):
+    run = db.query(ProductionRun).filter(ProductionRun.id == run_id).first()
+
+    if not run:
+        raise HTTPException(status_code=404, detail="Production run not found")
+
+    items = (
+        db.query(ProductionItem)
+        .filter(ProductionItem.production_run_id == run_id)
+        .all()
+    )
+
+    if not items:
+        raise HTTPException(
+            status_code=400,
+            detail="Production run cannot be completed without production items",
+        )
+
+    incomplete_items = [item.id for item in items if item.status != "completed"]
+
+    if incomplete_items:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "All production items must be completed before closing the run",
+                "incomplete_item_ids": incomplete_items,
+            },
+        )
+
+    run.status = "completed"
+
+    if payload.notes is not None:
+        run.notes = payload.notes
+
+    db.commit()
+    db.refresh(run)
+
+    await manager.broadcast(
+        "production_run_completed",
+        {
+            "id": run.id,
+            "status": run.status,
+        },
+    )
+
+    return run
 
 
 @router.post(
@@ -112,17 +157,10 @@ def create_production_item(
     payload: ProductionItemCreate,
     db: Session = Depends(get_db),
 ):
-    run = (
-        db.query(ProductionRun)
-        .filter(ProductionRun.id == run_id)
-        .first()
-    )
+    run = db.query(ProductionRun).filter(ProductionRun.id == run_id).first()
 
     if not run:
-        raise HTTPException(
-            status_code=404,
-            detail="Production run not found",
-        )
+        raise HTTPException(status_code=404, detail="Production run not found")
 
     item_data = payload.model_dump()
     item_data["production_run_id"] = run_id
@@ -144,17 +182,10 @@ def list_production_items(
     run_id: int,
     db: Session = Depends(get_db),
 ):
-    run = (
-        db.query(ProductionRun)
-        .filter(ProductionRun.id == run_id)
-        .first()
-    )
+    run = db.query(ProductionRun).filter(ProductionRun.id == run_id).first()
 
     if not run:
-        raise HTTPException(
-            status_code=404,
-            detail="Production run not found",
-        )
+        raise HTTPException(status_code=404, detail="Production run not found")
 
     return (
         db.query(ProductionItem)
@@ -172,17 +203,10 @@ def update_production_item(
     payload: ProductionItemUpdate,
     db: Session = Depends(get_db),
 ):
-    item = (
-        db.query(ProductionItem)
-        .filter(ProductionItem.id == item_id)
-        .first()
-    )
+    item = db.query(ProductionItem).filter(ProductionItem.id == item_id).first()
 
     if not item:
-        raise HTTPException(
-            status_code=404,
-            detail="Production item not found",
-        )
+        raise HTTPException(status_code=404, detail="Production item not found")
 
     for key, value in payload.model_dump().items():
         setattr(item, key, value)
@@ -198,28 +222,15 @@ def delete_production_item(
     item_id: int,
     db: Session = Depends(get_db),
 ):
-    item = (
-        db.query(ProductionItem)
-        .filter(ProductionItem.id == item_id)
-        .first()
-    )
+    item = db.query(ProductionItem).filter(ProductionItem.id == item_id).first()
 
     if not item:
-        raise HTTPException(
-            status_code=404,
-            detail="Production item not found",
-        )
+        raise HTTPException(status_code=404, detail="Production item not found")
 
     db.delete(item)
     db.commit()
 
     return {"message": "Production item deleted"}
-
-from datetime import datetime
-from datetime import timedelta
-
-from app.models.production_run import ProductionTemplateStage
-from app.schemas.production_run import ProductionItemAdvanceStage
 
 
 @router.post(
@@ -231,17 +242,10 @@ async def advance_production_item_stage(
     payload: ProductionItemAdvanceStage,
     db: Session = Depends(get_db),
 ):
-    item = (
-        db.query(ProductionItem)
-        .filter(ProductionItem.id == item_id)
-        .first()
-    )
+    item = db.query(ProductionItem).filter(ProductionItem.id == item_id).first()
 
     if not item:
-        raise HTTPException(
-            status_code=404,
-            detail="Production item not found",
-        )
+        raise HTTPException(status_code=404, detail="Production item not found")
 
     item.current_stage_index = item.current_stage_index + 1
     item.stage_started_at = datetime.utcnow()
@@ -260,9 +264,7 @@ async def advance_production_item_stage(
 
     if next_stage and next_stage.alert_after_minutes is not None:
         delay_minutes = payload.delay_minutes or next_stage.alert_after_minutes
-        item.suggested_stage_end = item.stage_started_at + timedelta(
-            minutes=delay_minutes,
-        )
+        item.suggested_stage_end = item.stage_started_at + timedelta(minutes=delay_minutes)
     elif payload.delay_minutes is not None:
         item.suggested_stage_end = item.stage_started_at + timedelta(
             minutes=payload.delay_minutes,
@@ -282,6 +284,47 @@ async def advance_production_item_stage(
             "production_run_id": item.production_run_id,
             "current_stage_index": item.current_stage_index,
             "status": item.status,
+        },
+    )
+
+    return item
+
+
+@router.post(
+    "/production-items/{item_id}/complete",
+    response_model=ProductionItemResponse,
+)
+async def complete_production_item(
+    item_id: int,
+    payload: ProductionItemComplete,
+    db: Session = Depends(get_db),
+):
+    item = db.query(ProductionItem).filter(ProductionItem.id == item_id).first()
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Production item not found")
+
+    item.good_quantity = payload.good_quantity
+    item.waste_quantity = payload.waste_quantity
+    item.waste_reason = payload.waste_reason
+    item.status = "completed"
+    item.completed_at = datetime.utcnow()
+    item.suggested_stage_end = None
+
+    if payload.notes is not None:
+        item.notes = payload.notes
+
+    db.commit()
+    db.refresh(item)
+
+    await manager.broadcast(
+        "production_item_completed",
+        {
+            "id": item.id,
+            "production_run_id": item.production_run_id,
+            "status": item.status,
+            "good_quantity": item.good_quantity,
+            "waste_quantity": item.waste_quantity,
         },
     )
 
@@ -350,53 +393,3 @@ def get_production_board(
         )
 
     return board
-
-from app.schemas.production_run import ProductionItemComplete
-
-
-@router.post(
-    "/production-items/{item_id}/complete",
-    response_model=ProductionItemResponse,
-)
-async def complete_production_item(
-    item_id: int,
-    payload: ProductionItemComplete,
-    db: Session = Depends(get_db),
-):
-    item = (
-        db.query(ProductionItem)
-        .filter(ProductionItem.id == item_id)
-        .first()
-    )
-
-    if not item:
-        raise HTTPException(
-            status_code=404,
-            detail="Production item not found",
-        )
-
-    item.good_quantity = payload.good_quantity
-    item.waste_quantity = payload.waste_quantity
-    item.waste_reason = payload.waste_reason
-    item.status = "completed"
-    item.completed_at = datetime.utcnow()
-    item.suggested_stage_end = None
-
-    if payload.notes is not None:
-        item.notes = payload.notes
-
-    db.commit()
-    db.refresh(item)
-
-    await manager.broadcast(
-        "production_item_completed",
-        {
-            "id": item.id,
-            "production_run_id": item.production_run_id,
-            "status": item.status,
-            "good_quantity": item.good_quantity,
-            "waste_quantity": item.waste_quantity,
-        },
-    )
-
-    return item

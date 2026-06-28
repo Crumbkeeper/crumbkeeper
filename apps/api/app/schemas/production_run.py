@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+﻿from pydantic import BaseModel
 
 
 class ProductionRunBase(BaseModel):
@@ -21,6 +21,10 @@ class ProductionRunResponse(ProductionRunBase):
 
     class Config:
         from_attributes = True
+
+
+class ProductionRunComplete(BaseModel):
+    notes: str | None = None
 
 
 class ProductionItemBase(BaseModel):
