@@ -11,6 +11,7 @@ from app.db.session import get_db
 from app.models.production_run import ProductionItem
 from app.models.production_run import ProductionRun
 from app.models.production_run import ProductionTemplateStage
+from app.models.recipe_ingredient import RecipeIngredient
 from app.schemas.production_run import ProductionItemAdvanceStage
 from app.schemas.production_run import ProductionItemComplete
 from app.schemas.production_run import ProductionItemCreate
@@ -303,6 +304,24 @@ async def complete_production_item(
 
     if not item:
         raise HTTPException(status_code=404, detail="Production item not found")
+
+    if item.status == "completed":
+        raise HTTPException(
+            status_code=400,
+            detail="Production item is already completed",
+        )
+
+    if item.recipe_id is not None:
+        recipe_ingredients = (
+            db.query(RecipeIngredient)
+            .filter(RecipeIngredient.recipe_id == item.recipe_id)
+            .all()
+        )
+
+        for recipe_ingredient in recipe_ingredients:
+            ingredient = recipe_ingredient.ingredient
+            quantity_used = recipe_ingredient.quantity * item.production_quantity
+            ingredient.current_stock = ingredient.current_stock - quantity_used
 
     item.good_quantity = payload.good_quantity
     item.waste_quantity = payload.waste_quantity
