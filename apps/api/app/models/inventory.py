@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 
 from sqlalchemy import Boolean
 from sqlalchemy import DateTime
@@ -15,10 +15,7 @@ from app.db.session import Base
 class Inventory(Base):
     __tablename__ = "inventory"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        index=True,
-    )
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
     product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id"),
@@ -26,9 +23,7 @@ class Inventory(Base):
         unique=True,
     )
 
-    item_name: Mapped[str] = mapped_column(
-        String,
-    )
+    item_name: Mapped[str] = mapped_column(String)
 
     category: Mapped[str] = mapped_column(
         String,
@@ -36,6 +31,16 @@ class Inventory(Base):
     )
 
     quantity_on_hand: Mapped[float] = mapped_column(
+        Float,
+        default=0.0,
+    )
+
+    reserved_quantity: Mapped[float] = mapped_column(
+        Float,
+        default=0.0,
+    )
+
+    available_quantity: Mapped[float] = mapped_column(
         Float,
         default=0.0,
     )
