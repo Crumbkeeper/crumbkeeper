@@ -11,3 +11,5 @@ from app.models.inventory import Inventory
 from app.models.ingredient import Ingredient
 from app.models.recipe_ingredient import RecipeIngredient
 from app.models.bakery_settings import BakerySettings
+
+from app.models.shopping import ShoppingItem
