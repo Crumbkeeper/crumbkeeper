@@ -111,10 +111,12 @@ def update_shopping_item(
             detail="Shopping item not found",
         )
 
+    previous_status = item.status
+
     for key, value in payload.model_dump().items():
         setattr(item, key, value)
 
-    if item.status == "purchased":
+    if item.status == "purchased" and previous_status != "purchased":
         item.purchased_at = datetime.utcnow()
 
         if item.inventory_item_id is not None:
