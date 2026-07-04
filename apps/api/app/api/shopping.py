@@ -116,6 +116,22 @@ def update_shopping_item(
 
     if item.status == "purchased":
         item.purchased_at = datetime.utcnow()
+
+        if item.inventory_item_id is not None:
+            inventory_item = (
+                db.query(Inventory)
+                .filter(Inventory.id == item.inventory_item_id)
+                .first()
+            )
+
+            if inventory_item:
+                inventory_item.quantity_on_hand += item.quantity_needed
+                inventory_item.available_quantity = (
+                    inventory_item.quantity_on_hand - inventory_item.reserved_quantity
+                )
+                inventory_item.low_stock = (
+                    inventory_item.available_quantity <= inventory_item.reorder_threshold
+                )
     else:
         item.purchased_at = None
 
