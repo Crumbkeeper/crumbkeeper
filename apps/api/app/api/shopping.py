@@ -20,7 +20,7 @@ router = APIRouter()
 def sync_inventory_shopping_items(db: Session) -> None:
     low_stock_items = (
         db.query(Inventory)
-        .filter(Inventory.quantity_on_hand <= Inventory.reorder_threshold)
+        .filter(Inventory.available_quantity <= Inventory.reorder_threshold)
         .all()
     )
 
@@ -35,7 +35,7 @@ def sync_inventory_shopping_items(db: Session) -> None:
         )
 
         needed_amount = max(
-            inventory_item.reorder_threshold - inventory_item.quantity_on_hand,
+            inventory_item.reorder_threshold - inventory_item.available_quantity,
             inventory_item.projected_depletion,
             0,
         )
